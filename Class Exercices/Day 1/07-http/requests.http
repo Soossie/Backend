@@ -1,0 +1,42 @@
+### Health
+GET http://127.0.0.1:3000/health
+
+### Echo, valid
+POST http://127.0.0.1:3000/api/echo
+Content-Type: application/json
+
+{
+  "message": "Hei REST Clientistä!"
+}
+
+### Echo, invalid length
+POST http://127.0.0.1:3000/api/echo
+Content-Type: application/json
+
+{
+  "message": ""
+}
+
+### Echo, invalid type
+POST http://127.0.0.1:3000/api/echo
+Content-Type: application/json
+
+{
+  "message": 42
+}
+
+### Wrong route
+GET http://127.0.0.1:3000/missing
+
+# Konsolipyyntö selaimesta (kutsu selaimen konsolissa)
+const response = await fetch("http://127.0.0.1:3000/api/echo", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    message: "Hei selaimesta!"
+  })
+});
+console.log(response.status);
+console.log(await response.json());

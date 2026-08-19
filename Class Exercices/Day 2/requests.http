@@ -1,0 +1,24 @@
+### Register
+POST http://localhost:3001/api/auth/register
+Content-Type: application/json
+
+{
+    "email": "player2@example.com",
+    "password": "password123",
+    "displayName": "Player One",
+    "playerColor": "#ff8800"
+}
+
+### Login
+POST http://localhost:3001/api/auth/login
+Content-Type: application/json
+
+{
+    "email": "player1@example.com",
+    "password": "password123"
+}
+
+### My Profile
+GET http://localhost:3001/api/profiles/me
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2ODFhZTA5Mi03OGQxLTRhY2QtODM1Zi00NTg3YzlkNDczNDEiLCJpYXQiOjE3ODcxMzE1NzAsImV4cCI6MTc4NzEzNTE3MH0.gkXFkY2n13t7rxf9F_FcBIoZ2bQPTski5R6PKFlzWBc
+
