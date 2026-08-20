@@ -13,6 +13,9 @@ export const config = {
     jwt: {
         secret: requireValue("JWT_SECRET"),
         expiration: process.env.JWT_EXPIRATION ?? "1h"
+    },
+    admin: {
+        admin_password: requireValue("ADMIN_PASSWORD")
     }
 };
 
