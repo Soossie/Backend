@@ -1,7 +1,9 @@
 import jwt from "jsonwebtoken";
 import { config } from "../config.js";
+import crypto from "node:crypto";
+import {db} from "../db.js";
 
-export function requireAuth(req, res, next) {
+export async function requireAuth(req, res, next) {
     const authorization = req.headers.authorization;
 
     if (!authorization?.startsWith("Bearer "))

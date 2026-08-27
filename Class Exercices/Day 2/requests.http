@@ -1,5 +1,5 @@
 ### Register
-POST http://localhost:3001/api/auth/register
+POST https://localhost:3001/api/auth/register
 Content-Type: application/json
 AdminPassword: admin
 
@@ -11,7 +11,7 @@ AdminPassword: admin
 }
 
 ### Login
-POST http://localhost:3001/api/auth/login
+POST https://localhost:3001/api/auth/login
 Content-Type: application/json
 
 {
@@ -20,7 +20,7 @@ Content-Type: application/json
 }
 
 ### Login admin
-POST http://localhost:3001/api/auth/login
+POST https://localhost:3001/api/auth/login
 Content-Type: application/json
 
 {
@@ -29,11 +29,11 @@ Content-Type: application/json
 }
 
 ### My Profile
-GET http://localhost:3001/api/profiles/me
+GET https://localhost:3001/api/profiles/me
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2ZmI4N2MyMC03MjQ3LTQwOTktYmI4ZC01ZDk0NjJjMzZhNTUiLCJpYXQiOjE3ODcyMzk5MTksImV4cCI6MTc4NzI0MzUxOX0.pNa7szAYJvEfb-W02cqqmj9U6Y7vjVFPBYoRgpaCqK4
 
 ### Change Color
-PATCH http://localhost:3001/api/profiles/me/color
+PATCH https://localhost:3001/api/profiles/me/color
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2ZmI4N2MyMC03MjQ3LTQwOTktYmI4ZC01ZDk0NjJjMzZhNTUiLCJpYXQiOjE3ODcyMzk5MTksImV4cCI6MTc4NzI0MzUxOX0.pNa7szAYJvEfb-W02cqqmj9U6Y7vjVFPBYoRgpaCqK4
 
@@ -42,16 +42,16 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2ZmI4N2MyM
 }
 
 ### Get users (admin)
-GET http://localhost:3001/api/auth/users/
+GET https://localhost:3001/api/auth/users/
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2ZmI4N2MyMC03MjQ3LTQwOTktYmI4ZC01ZDk0NjJjMzZhNTUiLCJpYXQiOjE3ODcyMzQyMjgsImV4cCI6MTc4NzIzNzgyOH0.kFRC1ogqtvQFMDmgXE44xUJfkHjHZoY-IOaudkuWFfs
 
 ### Get profiles (admin)
-GET http://localhost:3001/api/profiles/
+GET https://localhost:3001/api/profiles/
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2ZmI4N2MyMC03MjQ3LTQwOTktYmI4ZC01ZDk0NjJjMzZhNTUiLCJpYXQiOjE3ODcyMzgwODksImV4cCI6MTc4NzI0MTY4OX0.BbD2o-z1T3Ol6fFTPAd1M8DnAQV56hK-wwu-GLI0vXw
 
 
 ### Delete user and profile (admin)
-DELETE http://localhost:3001/api/auth/users/
+DELETE https://localhost:3001/api/auth/users/
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2ZmI4N2MyMC03MjQ3LTQwOTktYmI4ZC01ZDk0NjJjMzZhNTUiLCJpYXQiOjE3ODcyMzgwODksImV4cCI6MTc4NzI0MTY4OX0.BbD2o-z1T3Ol6fFTPAd1M8DnAQV56hK-wwu-GLI0vXw
 

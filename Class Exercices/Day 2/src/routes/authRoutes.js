@@ -60,8 +60,8 @@ authRouter.post("/register", async (req, res) => {
 });
 
 authRouter.post("/login", async (req, res) => {
-    const { email, password } = req.body;
-
+    const { email, password, staySignedIn } = req.body;
+    console.log("Login attempt with email:", email, "and password:", password);
     if (!email || !password)
         return res.status(400).json({ error: "Missing email or password" });
 
@@ -97,15 +97,53 @@ authRouter.post("/login", async (req, res) => {
             config.jwt.secret,
             { expiresIn: config.jwt.expiration, algorithm: "HS256"}
         );
+        let refreshToken = null
+
+        if (staySignedIn) {
+            refreshToken = jwt.sign(
+                { sub: user.user_id },
+                config.refreshToken.secret,
+                { expiresIn: config.refreshToken.expiration, algorithm: "HS256"}
+            );
+
+            const hashedToken = crypto
+                .createHash('sha256')
+                .update(refreshToken)
+                .digest('hex');
+
+            const expiration = new Date();
+            expiration.setDate(expiration.getDate() + config.refreshToken.expiration);
+
+            await db.query(
+                `INSERT INTO refresh_tokens (user_id, token_hash, expires_at) 
+                VALUES ($1, $2, $3)`,
+                [user.user_id, hashedToken, expiration]
+            )
+
+            console.log("Refresh token inserted into database");
+
+            // Cookies.refreshToken is a better way to store it, but Unity handles them on a device basis
+            // So it will be attached as a custom header
+            /*
+            res.cookie("refreshToken", refreshToken, {
+                httpOnly: true,
+                secure: true,
+                maxAge: config.refreshToken.expiration * 24 * 60 * 60 * 1000
+            });
+            */
+        }
+
         if (!result.rows[0].is_admin) {
             res.status(200).json({
                 accessToken: token,
+                refreshToken: refreshToken,
                 message: "Welcome " + userName,
             })
         }
         else {
             res.status(200).json({
                 accessToken: token,
+                refreshToken: refreshToken,
                 message: "Welcome admin user " + userName,
             })
         }
@@ -169,5 +207,44 @@ authRouter.delete("/users", requireAuth, requireAdmin, async (req, res) => {
     }
     finally {
         dbClient.release();
+    }
+})
+
+authRouter.post("/refresh", async (req, res) => {
+    const refreshToken = req.headers['X-Refresh-Token']
+
+    if (refreshToken) {
+        const hashedToken = crypto
+            .createHash('sha256')
+            .update(refreshToken)
+            .digest('hex');
+
+        try {
+            const result = await db.query(
+                `SELECT token_hash
+                    FROM refresh_tokens
+                    WHERE token_hash = $1 AND expires_at > NOW()`,
+                [hashedToken]
+            )
+
+            if (result.rows.length === 0) {
+                return res.status(401).json({ error: "Invalid refresh token" });
+            }
+
+            // Create new access token
+            const user = result.rows[0];
+            console.log("Creating new access token for user " + user.user_id)
+            const token = jwt.sign(
+                { sub: user.user_id },
+                config.jwt.secret,
+                { expiresIn: config.jwt.expiration, algorithm: "HS256"}
+            )
+
+            return res.status(200).json({ accessToken: token });
+        }
+        catch (error) {
+            console.error(error);
+            res.status(500).json({ error: "Unable to verify refresh token." })
+        }
     }
 })
