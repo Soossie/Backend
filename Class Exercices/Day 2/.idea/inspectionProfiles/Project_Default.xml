@@ -6,6 +6,7 @@
       <option name="customHeaders">
         <set>
           <option value="AdminPassword" />
+          <option value="X-Refresh-Token" />
         </set>
       </option>
     </inspection_tool>

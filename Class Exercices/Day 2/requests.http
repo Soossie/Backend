@@ -25,12 +25,13 @@ Content-Type: application/json
 
 {
     "email": "admin6@example.com",
-    "password": "password123"
+    "password": "password123",
+    "staySignedIn": "true"
 }
 
 ### My Profile
 GET https://localhost:3001/api/profiles/me
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2ZmI4N2MyMC03MjQ3LTQwOTktYmI4ZC01ZDk0NjJjMzZhNTUiLCJpYXQiOjE3ODcyMzk5MTksImV4cCI6MTc4NzI0MzUxOX0.pNa7szAYJvEfb-W02cqqmj9U6Y7vjVFPBYoRgpaCqK4
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2ZmI4N2MyMC03MjQ3LTQwOTktYmI4ZC01ZDk0NjJjMzZhNTUiLCJpYXQiOjE3ODgxNzUxMDUsImV4cCI6MTc4ODE3NTQ2NX0.lAuLOAC5ebAuEt4CQqPMN6iJACJFf2VlBcuDWqGW8XQ
 
 ### Change Color
 PATCH https://localhost:3001/api/profiles/me/color
@@ -58,3 +59,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2ZmI4N2MyM
 {
     "email": "admin1@example.com"
 }
+
+### Ask for a new access token with refresh token (duplicate requests with same refresh token trigger breach)
+POST https://localhost:3001/api/auth/refresh/
+X-Refresh-Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2ZmI4N2MyMC03MjQ3LTQwOTktYmI4ZC01ZDk0NjJjMzZhNTUiLCJpYXQiOjE3ODgzNTQ2MzcsImV4cCI6MTc4ODM1NDYzN30.OSnnHjylEtcQLhLkvy6verXApnbrH_BHIR3BW83-boc

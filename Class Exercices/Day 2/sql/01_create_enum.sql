@@ -1,0 +1,1 @@
+CREATE TYPE token_status AS ENUM ('Active', 'Used', 'Revoked');

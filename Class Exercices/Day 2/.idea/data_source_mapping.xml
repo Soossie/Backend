@@ -2,5 +2,6 @@
 <project version="4">
   <component name="DataSourcePerFileMappings">
     <file url="file://$PROJECT_DIR$/sql/00_create_tables.sql" value="181ce8e9-71cc-48ac-a757-0983e5c29369" />
+    <file url="file://$PROJECT_DIR$/sql/01_create_enum.sql" value="181ce8e9-71cc-48ac-a757-0983e5c29369" />
   </component>
 </project>

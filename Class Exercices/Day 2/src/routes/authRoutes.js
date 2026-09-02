@@ -9,6 +9,7 @@ import { toUserDto } from "../mappers.js";
 import {requireAdmin} from "../middleware/requireAdmin.js";
 import {requireAuth} from "../middleware/requireAuth.js";
 
+
 export const authRouter = express.Router();
 
 authRouter.post("/register", async (req, res) => {
@@ -100,27 +101,8 @@ authRouter.post("/login", async (req, res) => {
         let refreshToken = null
 
         if (staySignedIn) {
-            refreshToken = jwt.sign(
-                { sub: user.user_id },
-                config.refreshToken.secret,
-                { expiresIn: config.refreshToken.expiration, algorithm: "HS256"}
-            );
-
-            const hashedToken = crypto
-                .createHash('sha256')
-                .update(refreshToken)
-                .digest('hex');
-
-            const expiration = new Date();
-            expiration.setDate(expiration.getDate() + config.refreshToken.expiration);
-
-            await db.query(
-                `INSERT INTO refresh_tokens (user_id, token_hash, expires_at) 
-                VALUES ($1, $2, $3)`,
-                [user.user_id, hashedToken, expiration]
-            )
-
-            console.log("Refresh token inserted into database");
+            const familyId = crypto.randomUUID()
+            refreshToken = await createRefreshToken(user.user_id, familyId)
 
             // Cookies.refreshToken is a better way to store it, but Unity handles them on a device basis
             // So it will be attached as a custom header
@@ -211,8 +193,7 @@ authRouter.delete("/users", requireAuth, requireAdmin, async (req, res) => {
 })
 
 authRouter.post("/refresh", async (req, res) => {
-    const refreshToken = req.headers['X-Refresh-Token']
-
+    const refreshToken = req.headers['x-refresh-token']
     if (refreshToken) {
         const hashedToken = crypto
             .createHash('sha256')
@@ -221,18 +202,45 @@ authRouter.post("/refresh", async (req, res) => {
 
         try {
             const result = await db.query(
-                `SELECT token_hash
+                `SELECT user_id, family_id, status
                     FROM refresh_tokens
                     WHERE token_hash = $1 AND expires_at > NOW()`,
                 [hashedToken]
             )
+            const user = result.rows[0];
 
             if (result.rows.length === 0) {
-                return res.status(401).json({ error: "Invalid refresh token" });
+                return res.status(400).json({ error: "Invalid or expired refresh token" });
             }
+            
+            if (user.status === "Used") {
+                console.log("Refresh token already used, user compromised, invalidating tokens for family " + user.family_id)
+                await db.query(
+                    `UPDATE refresh_tokens
+                     SET status = 'Revoked'
+                     WHERE family_id = $1`,
+                    [user.family_id]
+                )
+                return res.status(400).json({ error: "Invalid refresh token" })
+            }
+            
+            if (user.status === "Revoked") {
+                console.log("Trying to access with a revoked refresh token")
+                return res.status(400).json({error: "Invalid refresh token"})
+            }
+            
+            await db.query(
+                `UPDATE refresh_tokens
+                 SET status = 'Used'
+                 WHERE token_hash = $1`,
+                [hashedToken]
+            )
+            console.log("Retired old refresh token for user " + user.user_id)
+            
+            // Create new refresh token
+            const refreshToken = await createRefreshToken(user.user_id, user.family_id)
 
             // Create new access token
-            const user = result.rows[0];
             console.log("Creating new access token for user " + user.user_id)
             const token = jwt.sign(
                 { sub: user.user_id },
@@ -240,11 +248,40 @@ authRouter.post("/refresh", async (req, res) => {
                 { expiresIn: config.jwt.expiration, algorithm: "HS256"}
             )
 
-            return res.status(200).json({ accessToken: token });
+            return res.status(200).json({ accessToken: token, refreshToken: refreshToken });
         }
         catch (error) {
             console.error(error);
             res.status(500).json({ error: "Unable to verify refresh token." })
         }
     }
+    console.error("Called refresh with no refresh token");
+    res.status(400).json({ error: "Invalid refresh token" })
 })
+
+async function createRefreshToken(user_id, family_id) {
+    const refreshToken = jwt.sign(
+        { sub: user_id },
+        config.refreshToken.secret,
+        { expiresIn: config.refreshToken.expiration, algorithm: "HS256"}
+    );
+
+    const tokenId = crypto.randomUUID()
+
+    const hashedToken = crypto
+        .createHash('sha256')
+        .update(refreshToken)
+        .digest('hex');
+
+    const expiration = new Date();
+    expiration.setDate(expiration.getDate() + config.refreshToken.expiration);
+    console.log(family_id)
+    await db.query(
+        `INSERT INTO refresh_tokens (id, user_id, token_hash, expires_at, family_id, status) 
+                VALUES ($1, $2, $3, $4, $5, $6)`,
+        [tokenId, user_id, hashedToken, expiration, family_id, "Active"]
+    )
+    
+    console.log("Refresh token inserted into database");
+    return refreshToken;
+}
